@@ -44,7 +44,6 @@ namespace AprWebBrowser
                 {
                     // Above three lines can be replaced with new helper method below
                     HttpResponseMessage response = await client.GetAsync(url);
-                    response.EnsureSuccessStatusCode();
 
                     statusCodeLabel.Text = $"Status Code: {(int)response.StatusCode}";
                     string responseBody = await response.Content.ReadAsStringAsync();
@@ -67,16 +66,10 @@ namespace AprWebBrowser
                             searchResultBox.Text = $"Please check your url and try again";
                             break;
                     }
-                    if (currentUrl != url)
-                    {
-                        backwardNavigationStack.Push(url);
-                        forwardNavigationStack.Clear();
-                        updateNavigationButtons();
-                    }
-                    currentUrl = url;
+                    updateNavigationStacks(url);
                     AddUrlToHistoryList(currentUrl);
                     setPageTitle(responseBody.Trim());
-                    
+
 
                 }
                 else
@@ -90,17 +83,18 @@ namespace AprWebBrowser
                 Console.WriteLine("\nException Caught!");
                 Console.WriteLine("Message :{0} ", e.Message);
             }
-           
+
         }
         private void updateNavigationButtons()
         {
-
+            backButton.Enabled = backwardNavigationStack.Count > 0;
+            forwardButton.Enabled = forwardNavigationStack.Count > 0;
         }
         private void setPageTitle(string htmlCode)
         {
             string pattern = @"<title>\s*(.+?)\s*</title>";
             Match match = Regex.Match(htmlCode, pattern);
-           if (match.Success)
+            if (match.Success)
             {
                 // MessageBox.Show(match.Groups[1].Value);
                 this.Text = match.Groups[1].Value;
@@ -109,11 +103,11 @@ namespace AprWebBrowser
             {
                 this.Text = $"Title not Found";
             }
-             
+
         }
         private async void searchButton_Click(object sender, EventArgs e)
         {
-            
+
             if (favouriteListBox.Visible)
             {
                 favouriteListBox.Visible = false;
@@ -122,14 +116,14 @@ namespace AprWebBrowser
                 modifyFavButton.Visible = false;
                 historyAndFavLabel.Visible = false;
             }
-            if(historyListBox.Visible)
+            if (historyListBox.Visible)
             {
                 historyAndFavLabel.Visible = false;
                 clearHistory.Visible = false;
             }
             await fetchHtmlCode(searchTextBox.Text);
         }
-        private void loadHomePage( )
+        private void loadHomePage()
         {
 
             if (File.Exists("home.txt"))
@@ -160,10 +154,10 @@ namespace AprWebBrowser
             fetchHtmlCode(currentUrl);
 
         }
-   
+
         private void favouriteButton_Click(object sender, EventArgs e)
         {
-          
+
             using (FavouriteDialog dialog = new FavouriteDialog(currentUrl))
             {
                 if (dialog.ShowDialog() == DialogResult.OK)
@@ -181,7 +175,7 @@ namespace AprWebBrowser
         private void updateFavouriteListBox()
         {
             favouriteListBox.Items.Clear();
-            foreach(string favourite in favouritesList)
+            foreach (string favourite in favouritesList)
             {
                 favouriteListBox.Items.Add(favourite);
             }
@@ -190,7 +184,7 @@ namespace AprWebBrowser
         {
             using (StreamWriter writetext = new StreamWriter("favourite.txt"))
             {
-                foreach(string favourite in favouritesList)
+                foreach (string favourite in favouritesList)
                     writetext.WriteLine(favourite);
             }
         }
@@ -215,10 +209,10 @@ namespace AprWebBrowser
             if (File.Exists("history.txt"))
             {
                 historyList.Clear();
-                using(StreamReader readtext = new StreamReader("history.txt"))
+                using (StreamReader readtext = new StreamReader("history.txt"))
                 {
                     string url;
-                    while((url = readtext.ReadLine()) != null)
+                    while ((url = readtext.ReadLine()) != null)
                     {
                         historyList.Add(url);
                     }
@@ -233,20 +227,24 @@ namespace AprWebBrowser
         private string extractUrl(string nameAndUrl)
         {
             string[] fullFavouriteString = nameAndUrl.Split('|');
-            return fullFavouriteString.Length == 2 ? fullFavouriteString[1].Trim(): "";
+            return fullFavouriteString.Length == 2 ? fullFavouriteString[1].Trim() : "";
         }
         private void favouritesMenu_Click(object sender, EventArgs e)
         {
+            historyListBox.Visible = false;
+            historyAndFavLabel.Text = "Favourites";
+            historyAndFavLabel.Visible = true;
+            clearHistory.Visible = false;
             favouriteListBox.Visible = !favouriteListBox.Visible;
-            favouriteButton.Location = favouriteListBox.Visible? new Point(564, 39): new Point(713, 39);
+            favouriteButton.Location = favouriteListBox.Visible ? new Point(564, 39) : new Point(713, 39);
             deleteFavouritesButton.Visible = favouriteListBox.Visible;
             modifyFavButton.Visible = favouriteListBox.Visible;
         }
         private void deleteFavouritesButton_Click(object sender, EventArgs e)
         {
-            if (favouriteListBox.SelectedItem!= null)
+            if (favouriteListBox.SelectedItem != null)
             {
-                favouritesList.Remove(favouriteListBox.SelectedItem.ToString()); 
+                favouritesList.Remove(favouriteListBox.SelectedItem.ToString());
             }
             updateFavouriteListBox();
             saveFavouritesToTextFile();
@@ -257,7 +255,7 @@ namespace AprWebBrowser
             {
                 string url = extractUrl(favouriteListBox.SelectedItem.ToString());
                 int index = favouritesList.IndexOf(favouriteListBox.SelectedItem.ToString());
-                
+
                 using (FavouriteDialog dialog = new FavouriteDialog(url))
                 {
                     if (dialog.ShowDialog() == DialogResult.OK)
@@ -273,9 +271,9 @@ namespace AprWebBrowser
         }
         private void homeButton_Click(object sender, EventArgs e)
         {
-            using(HomeDialog dialog = new HomeDialog(homePageUrl))
+            using (HomeDialog dialog = new HomeDialog(homePageUrl))
             {
-                if(dialog.ShowDialog() == DialogResult.OK)
+                if (dialog.ShowDialog() == DialogResult.OK)
                 {
                     homePageUrl = dialog.getHomeUrl;
                     saveHomePageUrlToTextFile(dialog.getHomeUrl);
@@ -304,8 +302,10 @@ namespace AprWebBrowser
 
                 if (!string.IsNullOrEmpty(url))
                     searchTextBox.Text = url;
-                    searchResultBox.Clear();
-                    fetchHtmlCode(url);
+                searchResultBox.Clear();
+                fetchHtmlCode(url);
+                
+                forwardNavigationStack.Clear();
             }
 
         }
@@ -317,6 +317,10 @@ namespace AprWebBrowser
         }
         private void historyButton_Click(object sender, EventArgs e)
         {
+            favouriteListBox.Visible = false;
+            deleteFavouritesButton.Visible = false;
+            modifyFavButton.Visible = false;
+            favouriteButton.Location = new Point(713, 39);
             historyListBox.Visible = !historyListBox.Visible;
             clearHistory.Visible = historyListBox.Visible;
             historyAndFavLabel.Visible = historyListBox.Visible;
@@ -342,7 +346,7 @@ namespace AprWebBrowser
             {
                 File.Delete("history.txt");
             }
-           
+
         }
 
         private void saveHistoryToTextFile()
@@ -356,29 +360,59 @@ namespace AprWebBrowser
 
         private void historyListBox_DoubleClick(object sender, EventArgs e)
         {
+
             if (historyListBox.SelectedIndex != -1)
             {
-                fetchHtmlCode(favouriteListBox.SelectedItem.ToString());
+                fetchHtmlCode(historyListBox.SelectedItem.ToString());
+                searchTextBox.Text = currentUrl;
+                forwardNavigationStack.Clear();
             }
 
         }
 
         private void backButton_Click(object sender, EventArgs e)
         {
-            if (backwardNavigationStack.Count == 0)
+            if (backwardNavigationStack.Count > 0)
             {
-                backButton.Enabled = false;
-                return;
+                PushToStack(forwardNavigationStack, currentUrl);
+                currentUrl = backwardNavigationStack.Pop();
+                fetchHtmlCode(currentUrl);
+                searchTextBox.Text = currentUrl;
+                updateNavigationButtons();
             }
-            forwardNavigationStack.Push(currentUrl);
-            currentUrl = backwardNavigationStack.Pop();
-            searchTextBox.Text = currentUrl;
-            fetchHtmlCode(currentUrl);
+
+        }
+        private void PushToStack(Stack<string> stack,string url)
+        {
+            if (stack.Count == 0 || stack.Peek()!= url)
+            {
+                stack.Push(url);
+            }
         }
 
+
+        private void updateNavigationStacks(string url)
+        {
+            if(currentUrl != url)
+            {
+                PushToStack(backwardNavigationStack, currentUrl);
+                forwardNavigationStack.Clear();
+            }
+            currentUrl = url;
+            updateNavigationButtons();
+        }
         private void forwardButton_Click(object sender, EventArgs e)
         {
+            if (forwardNavigationStack.Count > 0)
+            {
+                PushToStack(backwardNavigationStack, currentUrl);
+                currentUrl = forwardNavigationStack.Pop();
+                fetchHtmlCode(currentUrl);
+                searchTextBox.Text = currentUrl;
+                updateNavigationButtons();
+            }
 
         }
     }
+    
 }
