@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.IO;
 using System.Drawing;
+using System.Text;
 
 namespace AprWebBrowser
 {
@@ -35,19 +36,21 @@ namespace AprWebBrowser
             loadHomePage();
             searchTextBox.Text = currentUrl;
         }
-        private async Task fetchHtmlCode(string url)
+        private async Task fetchHtmlCode(string url, bool bulkFlag = false)
         {
             // Call asynchronous network methods in a try/catch block to handle exceptions.
             try
             {
                 if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
                 {
-                    // Above three lines can be replaced with new helper method below
+                   
                     HttpResponseMessage response = await client.GetAsync(url);
 
                     statusCodeLabel.Text = $"Status Code: {(int)response.StatusCode}";
                     string responseBody = await response.Content.ReadAsStringAsync();
-
+                    int bytes = Encoding.UTF8.GetByteCount(responseBody);
+                    if (!bulkFlag)
+                    { 
                     switch (response.StatusCode)
                     {
                         case System.Net.HttpStatusCode.OK:
@@ -69,6 +72,11 @@ namespace AprWebBrowser
                     updateNavigationStacks(url);
                     AddUrlToHistoryList(currentUrl);
                     setPageTitle(responseBody.Trim());
+                    }
+                    else
+                    {
+                        searchResultBox.AppendText($"<{(int)response.StatusCode}>       <{bytes}>       <{url}>\n");
+                    }
 
 
                 }
@@ -154,7 +162,6 @@ namespace AprWebBrowser
             fetchHtmlCode(currentUrl);
 
         }
-
         private void favouriteButton_Click(object sender, EventArgs e)
         {
 
@@ -328,7 +335,6 @@ namespace AprWebBrowser
 
 
         }
-
         private void updateHistoryListBox()
         {
             historyListBox.Items.Clear();
@@ -337,7 +343,6 @@ namespace AprWebBrowser
                 historyListBox.Items.Add(history);
             }
         }
-
         private void clearHistory_Click(object sender, EventArgs e)
         {
             historyList.Clear();
@@ -348,7 +353,6 @@ namespace AprWebBrowser
             }
 
         }
-
         private void saveHistoryToTextFile()
         {
             using (StreamWriter writetext = new StreamWriter("history.txt"))
@@ -357,7 +361,6 @@ namespace AprWebBrowser
                     writetext.WriteLine(history);
             }
         }
-
         private void historyListBox_DoubleClick(object sender, EventArgs e)
         {
 
@@ -369,7 +372,6 @@ namespace AprWebBrowser
             }
 
         }
-
         private void backButton_Click(object sender, EventArgs e)
         {
             if (backwardNavigationStack.Count > 0)
@@ -389,8 +391,6 @@ namespace AprWebBrowser
                 stack.Push(url);
             }
         }
-
-
         private void updateNavigationStacks(string url)
         {
             if(currentUrl != url)
@@ -412,6 +412,40 @@ namespace AprWebBrowser
                 updateNavigationButtons();
             }
 
+        }
+        private async void bulkButton_Click(object sender, EventArgs e)
+        {
+            searchResultBox.Clear();
+            var fileContent = string.Empty;
+            var filePath = string.Empty;
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.InitialDirectory = "c:\\";
+                openFileDialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+                openFileDialog.FilterIndex = 2;
+                openFileDialog.RestoreDirectory = true;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    //Get the path of specified file
+                    filePath = openFileDialog.FileName;
+
+                    //Read the contents of the file into a stream
+                    var fileStream = openFileDialog.OpenFile();
+
+                    using (StreamReader reader = new StreamReader(fileStream))
+                    {
+                        fileContent = reader.ReadToEnd();
+                    }
+
+                }
+            }
+            string[] urls = File.ReadAllLines(filePath);
+            foreach(string url in urls)
+            {
+                fetchHtmlCode(url,true);
+
+            }
         }
     }
     
