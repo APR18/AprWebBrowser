@@ -48,6 +48,7 @@ namespace AprWebBrowser
             this.clearHistory = new System.Windows.Forms.Button();
             this.historyAndFavLabel = new System.Windows.Forms.Label();
             this.bulkButton = new System.Windows.Forms.Button();
+            this.changeBulkButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // searchTextBox
@@ -232,11 +233,22 @@ namespace AprWebBrowser
             this.bulkButton.UseVisualStyleBackColor = true;
             this.bulkButton.Click += new System.EventHandler(this.bulkButton_Click);
             // 
+            // changeBulkButton
+            // 
+            this.changeBulkButton.Location = new System.Drawing.Point(175, 68);
+            this.changeBulkButton.Name = "changeBulkButton";
+            this.changeBulkButton.Size = new System.Drawing.Size(85, 23);
+            this.changeBulkButton.TabIndex = 19;
+            this.changeBulkButton.Text = "Change Bulk";
+            this.changeBulkButton.UseVisualStyleBackColor = true;
+            this.changeBulkButton.Click += new System.EventHandler(this.changeBulkButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.changeBulkButton);
             this.Controls.Add(this.bulkButton);
             this.Controls.Add(this.historyAndFavLabel);
             this.Controls.Add(this.clearHistory);
@@ -284,6 +296,7 @@ namespace AprWebBrowser
         private System.Windows.Forms.Button clearHistory;
         private System.Windows.Forms.Label historyAndFavLabel;
         private System.Windows.Forms.Button bulkButton;
+        private System.Windows.Forms.Button changeBulkButton;
     }
 }
 

@@ -17,7 +17,7 @@ namespace AprWebBrowser
         static readonly HttpClient client = new HttpClient();
         private List<string> favouritesList = new List<string>();
         private List<string> historyList = new List<string>();
-
+        private string bulkPath = "bulk.txt";
         static Stack<string> forwardNavigationStack = new Stack<string>();
         static Stack<string> backwardNavigationStack = new Stack<string>();
         public Form1()
@@ -25,6 +25,7 @@ namespace AprWebBrowser
             InitializeComponent();
             loadFavourites();
             loadHistory();
+            createBulkFile();
             backButton.Enabled = false;
             forwardButton.Enabled = false;
             favouriteListBox.Visible = false;
@@ -36,9 +37,12 @@ namespace AprWebBrowser
             loadHomePage();
             searchTextBox.Text = currentUrl;
         }
+
+        // This method sends an http request and fetch the raw HTML code
+        // parameter url is the website url
+        // parameter bulkFlag indicates whether this function was called from bulk button or not
         private async Task fetchHtmlCode(string url, bool bulkFlag = false)
         {
-            // Call asynchronous network methods in a try/catch block to handle exceptions.
             try
             {
                 if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
@@ -51,6 +55,7 @@ namespace AprWebBrowser
                     int bytes = Encoding.UTF8.GetByteCount(responseBody);
                     if (!bulkFlag)
                     { 
+                    // This switch handles different status codes and shows corresponding message in the search Result Box
                     switch (response.StatusCode)
                     {
                         case System.Net.HttpStatusCode.OK:
@@ -77,8 +82,6 @@ namespace AprWebBrowser
                     {
                         searchResultBox.AppendText($"<{(int)response.StatusCode}>       <{bytes}>       <{url}>\n");
                     }
-
-
                 }
                 else
                 {
@@ -115,7 +118,6 @@ namespace AprWebBrowser
         }
         private async void searchButton_Click(object sender, EventArgs e)
         {
-
             if (favouriteListBox.Visible)
             {
                 favouriteListBox.Visible = false;
@@ -239,8 +241,8 @@ namespace AprWebBrowser
         private void favouritesMenu_Click(object sender, EventArgs e)
         {
             historyListBox.Visible = false;
+            historyAndFavLabel.Visible = favouriteListBox.Visible;
             historyAndFavLabel.Text = "Favourites";
-            historyAndFavLabel.Visible = true;
             clearHistory.Visible = false;
             favouriteListBox.Visible = !favouriteListBox.Visible;
             favouriteButton.Location = favouriteListBox.Visible ? new Point(564, 39) : new Point(713, 39);
@@ -363,14 +365,12 @@ namespace AprWebBrowser
         }
         private void historyListBox_DoubleClick(object sender, EventArgs e)
         {
-
             if (historyListBox.SelectedIndex != -1)
             {
                 fetchHtmlCode(historyListBox.SelectedItem.ToString());
                 searchTextBox.Text = currentUrl;
                 forwardNavigationStack.Clear();
             }
-
         }
         private void backButton_Click(object sender, EventArgs e)
         {
@@ -413,11 +413,37 @@ namespace AprWebBrowser
             }
 
         }
+        private void createBulkFile()
+        {
+            string[] urls = { "https://www.google.com", "https://www.youtube.com", "https://www.facebook.com", "https://www.wikipedia.org", "https://www.amazon.com" };
+            if (!File.Exists(bulkPath))
+            {
+                using (StreamWriter writetext = new StreamWriter(bulkPath))
+                {
+                    foreach(string url in urls)
+                    {
+                        writetext.WriteLine(url);
+
+                    }
+                }
+            }
+        }
         private async void bulkButton_Click(object sender, EventArgs e)
         {
             searchResultBox.Clear();
-            var fileContent = string.Empty;
-            var filePath = string.Empty;
+            if (File.Exists(bulkPath))
+            {
+                string[] urls = File.ReadAllLines(bulkPath);
+                foreach (string url in urls)
+                {
+                    fetchHtmlCode(url, true);
+
+                }
+
+            }
+        }
+        private void changeBulkButton_Click(object sender, EventArgs e)
+        {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
                 openFileDialog.InitialDirectory = "c:\\";
@@ -427,24 +453,15 @@ namespace AprWebBrowser
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    //Get the path of specified file
-                    filePath = openFileDialog.FileName;
 
-                    //Read the contents of the file into a stream
-                    var fileStream = openFileDialog.OpenFile();
-
-                    using (StreamReader reader = new StreamReader(fileStream))
-                    {
-                        fileContent = reader.ReadToEnd();
-                    }
+                    bulkPath = openFileDialog.FileName;
+                    MessageBox.Show($"New bulk file path has been set: {bulkPath}");
 
                 }
-            }
-            string[] urls = File.ReadAllLines(filePath);
-            foreach(string url in urls)
-            {
-                fetchHtmlCode(url,true);
-
+                else
+                {
+                    MessageBox.Show("Please select a folder to set a new file for Bulk Download");
+                }
             }
         }
     }
