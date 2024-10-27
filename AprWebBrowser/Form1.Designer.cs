@@ -57,6 +57,7 @@ namespace AprWebBrowser
             this.searchTextBox.Name = "searchTextBox";
             this.searchTextBox.Size = new System.Drawing.Size(532, 20);
             this.searchTextBox.TabIndex = 0;
+            this.searchTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.searchTextBox_KeyDown);
             // 
             // searchButton
             // 
@@ -92,7 +93,7 @@ namespace AprWebBrowser
             // 
             this.searchResultBox.Location = new System.Drawing.Point(13, 96);
             this.searchResultBox.Name = "searchResultBox";
-            this.searchResultBox.Size = new System.Drawing.Size(775, 342);
+            this.searchResultBox.Size = new System.Drawing.Size(1312, 551);
             this.searchResultBox.TabIndex = 4;
             this.searchResultBox.Text = "";
             // 
@@ -117,7 +118,7 @@ namespace AprWebBrowser
             // 
             // favouriteButton
             // 
-            this.favouriteButton.Location = new System.Drawing.Point(713, 39);
+            this.favouriteButton.Location = new System.Drawing.Point(794, 10);
             this.favouriteButton.Name = "favouriteButton";
             this.favouriteButton.Size = new System.Drawing.Size(75, 23);
             this.favouriteButton.TabIndex = 7;
@@ -128,9 +129,9 @@ namespace AprWebBrowser
             // favouriteListBox
             // 
             this.favouriteListBox.FormattingEnabled = true;
-            this.favouriteListBox.Location = new System.Drawing.Point(564, 96);
+            this.favouriteListBox.Location = new System.Drawing.Point(1040, 97);
             this.favouriteListBox.Name = "favouriteListBox";
-            this.favouriteListBox.Size = new System.Drawing.Size(224, 342);
+            this.favouriteListBox.Size = new System.Drawing.Size(285, 550);
             this.favouriteListBox.TabIndex = 8;
             this.favouriteListBox.SelectedIndexChanged += new System.EventHandler(this.favouriteListBox_SelectedIndexChanged);
             this.favouriteListBox.DoubleClick += new System.EventHandler(this.favouriteListBox_DoubleClick);
@@ -147,7 +148,7 @@ namespace AprWebBrowser
             // 
             // deleteFavouritesButton
             // 
-            this.deleteFavouritesButton.Location = new System.Drawing.Point(645, 39);
+            this.deleteFavouritesButton.Location = new System.Drawing.Point(1171, 35);
             this.deleteFavouritesButton.Name = "deleteFavouritesButton";
             this.deleteFavouritesButton.Size = new System.Drawing.Size(75, 23);
             this.deleteFavouritesButton.TabIndex = 10;
@@ -157,7 +158,7 @@ namespace AprWebBrowser
             // 
             // modifyFavButton
             // 
-            this.modifyFavButton.Location = new System.Drawing.Point(726, 39);
+            this.modifyFavButton.Location = new System.Drawing.Point(1252, 35);
             this.modifyFavButton.Name = "modifyFavButton";
             this.modifyFavButton.Size = new System.Drawing.Size(62, 23);
             this.modifyFavButton.TabIndex = 11;
@@ -198,15 +199,15 @@ namespace AprWebBrowser
             // historyListBox
             // 
             this.historyListBox.FormattingEnabled = true;
-            this.historyListBox.Location = new System.Drawing.Point(564, 96);
+            this.historyListBox.Location = new System.Drawing.Point(1040, 96);
             this.historyListBox.Name = "historyListBox";
-            this.historyListBox.Size = new System.Drawing.Size(224, 342);
+            this.historyListBox.Size = new System.Drawing.Size(285, 550);
             this.historyListBox.TabIndex = 15;
             this.historyListBox.DoubleClick += new System.EventHandler(this.historyListBox_DoubleClick);
             // 
             // clearHistory
             // 
-            this.clearHistory.Location = new System.Drawing.Point(713, 72);
+            this.clearHistory.Location = new System.Drawing.Point(1239, 68);
             this.clearHistory.Name = "clearHistory";
             this.clearHistory.Size = new System.Drawing.Size(75, 23);
             this.clearHistory.TabIndex = 16;
@@ -217,7 +218,7 @@ namespace AprWebBrowser
             // historyAndFavLabel
             // 
             this.historyAndFavLabel.AutoSize = true;
-            this.historyAndFavLabel.Location = new System.Drawing.Point(564, 77);
+            this.historyAndFavLabel.Location = new System.Drawing.Point(1037, 78);
             this.historyAndFavLabel.Name = "historyAndFavLabel";
             this.historyAndFavLabel.Size = new System.Drawing.Size(66, 13);
             this.historyAndFavLabel.TabIndex = 17;
@@ -235,7 +236,7 @@ namespace AprWebBrowser
             // 
             // changeBulkButton
             // 
-            this.changeBulkButton.Location = new System.Drawing.Point(175, 68);
+            this.changeBulkButton.Location = new System.Drawing.Point(565, 39);
             this.changeBulkButton.Name = "changeBulkButton";
             this.changeBulkButton.Size = new System.Drawing.Size(85, 23);
             this.changeBulkButton.TabIndex = 19;
@@ -247,7 +248,7 @@ namespace AprWebBrowser
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(1326, 649);
             this.Controls.Add(this.changeBulkButton);
             this.Controls.Add(this.bulkButton);
             this.Controls.Add(this.historyAndFavLabel);
